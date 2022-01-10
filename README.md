@@ -1,6 +1,6 @@
 # Python Environment
 
-Course Website
+Python based Webapp
 
 ## Dev Command Cheatsheet
 
