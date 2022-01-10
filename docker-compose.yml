@@ -1,0 +1,53 @@
+version: "3"
+
+services:
+  db:
+    container_name: db
+    restart: on-failure
+    image: postgres:14.1
+    env_file: ./config/.env
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - db_net
+  app:
+    build: 
+      context: ./config
+      dockerfile: app.Dockerfile
+    env_file: ./config/.env
+    container_name: app
+    expose:
+      - "8000"
+    networks:
+      - db_net
+      - server_net
+    volumes:
+      - ./app:/var/app
+      - db-data:/var/lib/postgresql/data
+    working_dir: /var/app
+    entrypoint: /var/tmp/entrypoint.sh
+    depends_on: 
+      - db
+  server:
+    build: 
+      context: ./config
+      dockerfile: nginx.Dockerfile
+    container_name: server
+    #command: [nginx-debug, '-g', 'daemon off;']
+    restart: on-failure
+    networks:
+      - server_net
+    volumes:
+      - ./app/static:/srv/static
+    ports:
+      - "80:80"
+    depends_on:
+      - app
+
+networks:
+  db_net:
+  server_net:
+
+volumes:
+  db-data:
+
